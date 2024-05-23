@@ -1,3 +1,4 @@
+import 'package:app_consultorio/screens/especialidad.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -16,6 +17,13 @@ class _HomeState extends State<Home> {
       ),
       body: const Center(
         child: Text('Welcome to the Home Screen!'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => Especialidad()));
+        },
       ),
     );
   }
