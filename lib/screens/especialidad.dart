@@ -3,70 +3,95 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class Especialidad extends StatefulWidget {
-  const Especialidad({super.key});
+  final String? docId;
+  final String? initialName;
+  const Especialidad({Key? key, this.docId, this.initialName})
+      : super(key: key);
 
   @override
   State<Especialidad> createState() => _EspecialidadState();
 }
+
 class _EspecialidadState extends State<Especialidad> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: appBar(
-        title: Text(¨Home¨),
-      ),
-       
-       body: Center(
-        child: StreamBuilder(
-           stream: FirebaseFirestore.instance.collection()
-        )
-        )
-       }
-}
-Future<void> _saveData() async {
-  //Crear
-  FirebaseFirestore.instance
-      .collection('especialidades')
-      .add({'nombre': _nameController.text});
+  void initState() {
+    super.initState();
+    if (widget.initialName != null) {
+      _nameController.text = widget.initialName!;
+    }
+  }
 
-//Actualizar
-  FirebaseFirestore.instance
-      .collection('especialidades')
-      .doc('')
-      .update({'nombre': _nameController.txt});
-//Borrar
-  FirebaseFirestore.instance.collection('especialidades').doc('').delete();
-//MostrarS 
-StreamBuilder(
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
 
-  stream : FiresbaseFirestore.instance.collection('especialidades').snapshots();
+  Future<void> _saveData() async {
+    if (_formKey.currentState!.validate()) {
+      if (widget.docId == null) {
+        // Crear
+        await FirebaseFirestore.instance.collection('especialidades').add({
+          'nombre': _nameController.text,
+        });
+      } else {
+        // Actualizar
+        await FirebaseFirestore.instance
+            .collection('especialidades')
+            .doc(widget.docId)
+            .update({
+          'nombre': _nameController.text,
+        });
+      }
+      Navigator.pop(context, 'saved');
+    }
+  }
 
-)};
+  Future<void> _deleteData() async {
+    if (widget.docId != null) {
+      await FirebaseFirestore.instance
+          .collection('especialidades')
+          .doc(widget.docId)
+          .delete();
+      Navigator.pop(context, 'deleted');
+    }
+  }
 
-class _EspecialidadState extends State<Especialidad> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nueva especialidad'),
+        title: Text('Formulario de Especialidad'),
+        actions: [
+          if (widget.docId != null)
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: _deleteData,
+            ),
+        ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Nombre de la especialidad',
-                ),
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Nombre'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese su nombre';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  // Acción al presionar el botón
-                },
+                onPressed: _saveData,
                 child: Text('Guardar'),
               ),
             ],
