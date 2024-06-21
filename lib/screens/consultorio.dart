@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-class Especialidad extends StatefulWidget {
+class Consultorio extends StatefulWidget {
   final String? docId;
   final String? initialName;
-  const Especialidad({Key? key, this.docId, this.initialName})
-      : super(key: key);
+  const Consultorio({Key? key, this.docId, this.initialName}) : super(key: key);
 
   @override
-  State<Especialidad> createState() => _EspecialidadState();
+  State<Consultorio> createState() => _ConsultorioState();
 }
 
-class _EspecialidadState extends State<Especialidad> {
+class _ConsultorioState extends State<Consultorio> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
 
@@ -33,19 +33,18 @@ class _EspecialidadState extends State<Especialidad> {
     if (_formKey.currentState!.validate()) {
       if (widget.docId == null) {
         // Crear
-        await FirebaseFirestore.instance.collection('especialidades').add({
+        await FirebaseFirestore.instance.collection('consultorios').add({
           'nombre': _nameController.text,
         });
       } else {
         // Actualizar
         await FirebaseFirestore.instance
-            .collection('especialidades')
+            .collection('consultorios')
             .doc(widget.docId)
             .update({
           'nombre': _nameController.text,
         });
       }
-      // ignore: use_build_context_synchronously
       Navigator.pop(context, 'saved');
     }
   }
@@ -53,10 +52,9 @@ class _EspecialidadState extends State<Especialidad> {
   Future<void> _deleteData() async {
     if (widget.docId != null) {
       await FirebaseFirestore.instance
-          .collection('especialidades')
+          .collection('consultorios')
           .doc(widget.docId)
           .delete();
-      // ignore: use_build_context_synchronously
       Navigator.pop(context, 'deleted');
     }
   }
@@ -65,11 +63,11 @@ class _EspecialidadState extends State<Especialidad> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Formulario de Especialidad'),
+        title: Text('Formulario de Consultorio'),
         actions: [
           if (widget.docId != null)
             IconButton(
-              icon: const Icon(Icons.delete),
+              icon: Icon(Icons.delete),
               onPressed: _deleteData,
             ),
         ],
@@ -82,18 +80,18 @@ class _EspecialidadState extends State<Especialidad> {
             children: <Widget>[
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Nombre'),
+                decoration: InputDecoration(labelText: 'Nombre'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese su nombre';
+                    return 'Por favor ingresa el nombre';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveData,
-                child: const Text('Guardar'),
+                child: Text('Guardar'),
               ),
             ],
           ),

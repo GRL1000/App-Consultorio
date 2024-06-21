@@ -2,19 +2,19 @@ import 'package:app_consultorio/screens/especialidad.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class Especialidades extends StatefulWidget {
+  const Especialidades({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Especialidades> createState() => _EspecialidadesState();
 }
 
-class _HomeState extends State<Home> {
+class _EspecialidadesState extends State<Especialidades> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Menú"),
+        title: Text("Especialidades"),
       ),
       body: Center(
         child: StreamBuilder(

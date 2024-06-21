@@ -1,8 +1,12 @@
-import 'package:app_consultorio/screens/home.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:quickalert/quickalert.dart';
+import 'registrar_usuario.dart';
+import 'adminHome.dart';
+import 'doctorHome.dart';
+import 'pacienteHome.dart';
 
 class Login extends StatelessWidget {
   final TextEditingController txtUserController = TextEditingController();
@@ -20,11 +24,56 @@ class Login extends StatelessWidget {
       User? user = userCredential.user;
 
       if (user != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const Home()),
-        );
+        // Obtenemos el rol del usuario desde Firestore
+        DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(user.uid)
+            .get();
+        if (docSnapshot.exists) {
+          String rol = docSnapshot.get('rol');
+
+          // Redirigimos al usuario a la pantalla correspondiente según su rol
+          switch (rol) {
+            case 'Administrador':
+              // ignore: use_build_context_synchronously
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminHome()),
+              );
+              break;
+            case 'Doctor':
+              // ignore: use_build_context_synchronously
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const DoctorHome()),
+              );
+              break;
+            case 'Paciente':
+              // ignore: use_build_context_synchronously
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const PacienteHome()),
+              );
+              break;
+            default:
+              QuickAlert.show(
+                context: context,
+                type: QuickAlertType.error,
+                title: 'Error',
+                text: 'Rol de usuario no reconocido',
+              );
+          }
+        } else {
+          // ignore: use_build_context_synchronously
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'Error',
+            text: 'No se encontró información del usuario',
+          );
+        }
       } else {
+        // ignore: use_build_context_synchronously
         QuickAlert.show(
           context: context,
           type: QuickAlertType.info,
@@ -33,7 +82,9 @@ class Login extends StatelessWidget {
         );
       }
     } catch (e) {
+      // ignore: avoid_print
       print('Error: ${e.toString()}');
+      // ignore: use_build_context_synchronously
       QuickAlert.show(
         context: context,
         type: QuickAlertType.error,
@@ -215,13 +266,20 @@ class Login extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 70),
-                  FadeInUp(
-                    duration: const Duration(milliseconds: 2000),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RegistrarUsuario()),
+                      );
+                    },
                     child: const Text(
-                      "Forgot Password?",
+                      "¿Aún no tienes cuenta? Registrate",
                       style: TextStyle(
                         color: Color.fromRGBO(143, 148, 251, 1),
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
